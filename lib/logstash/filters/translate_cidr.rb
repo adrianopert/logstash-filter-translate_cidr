@@ -125,29 +125,29 @@ class LogStash::Filters::Translate_CIDR < LogStash::Filters::Base
       @next_refresh = Time.now + @refresh_interval
       registering = true
       load_yaml(registering)
-		elsif @cidr
-			# map @dictionary putting IPAddr as key
-			@dictionary = @dictionary.each_with_object({}) { |(k, v), o|
-				begin
-					o[IPAddr.new(k)] = v
-				rescue ArgumentError => e
-					@logger.error("Invalid IP network, skipping", :network => n, :event => event)
-				end
-			}
+    elsif @cidr
+      # map @dictionary putting IPAddr as key
+      @dictionary = @dictionary.each_with_object({}) { |(k, v), o|
+        begin
+          o[IPAddr.new(k)] = v
+        rescue ArgumentError => e
+          @logger.error("Invalid IP network, skipping", :network => n, :event => event)
+        end
+      }
     end
     
     @logger.debug? and @logger.debug("#{self.class.name}: Dictionary - ", :dictionary => @dictionary)
     if @exact
       @logger.debug? and @logger.debug("#{self.class.name}: Dictionary translation method - Exact")
-			if @regex
-      	@logger.debug? and @logger.debug("#{self.class.name}: Dictionary keys - Regex")
-			end
-			if @cidr
-      	@logger.debug? and @logger.debug("#{self.class.name}: Dictionary keys - CIDR")
-			end
-			if @regex and @cidr
+      if @regex
+        @logger.debug? and @logger.debug("#{self.class.name}: Dictionary keys - Regex")
+      end
+      if @cidr
+        @logger.debug? and @logger.debug("#{self.class.name}: Dictionary keys - CIDR")
+      end
+      if @regex and @cidr
         raise "#{self.class.name}: Bad Syntax regex and cidr are mutually exclusive."
-			end
+      end
     else
       @logger.debug? and @logger.debug("#{self.class.name}: Dictionary translation method - Fuzzy")
     end
@@ -162,17 +162,17 @@ class LogStash::Filters::Translate_CIDR < LogStash::Filters::Base
 
     begin
 
-			if !@cidr		
-      	@dictionary.merge!(YAML.load_file(@dictionary_path))
-			else
-				@dictionary.merge!( (YAML.load_file(@dictionary_path)).each_with_object({}) { |(k, v), o| 						
-		      begin
-     			  o[IPAddr.new(k)] = v
-		      rescue ArgumentError => e
-     			  @logger.error("Invalid IP network, skipping", :network => n, :event => event)
-     			end
-				} )
-			end
+      if !@cidr    
+        @dictionary.merge!(YAML.load_file(@dictionary_path))
+      else
+        @dictionary.merge!( (YAML.load_file(@dictionary_path)).each_with_object({}) { |(k, v), o|             
+          begin
+             o[IPAddr.new(k)] = v
+          rescue ArgumentError => e
+             @logger.error("Invalid IP network, skipping", :network => n, :event => event)
+           end
+        } )
+      end
 
     rescue Exception => e
       if registering
@@ -210,7 +210,7 @@ class LogStash::Filters::Translate_CIDR < LogStash::Filters::Base
             matched = true
           end
         elsif @cidr
-					source = IPAddr.new(source)
+          source = IPAddr.new(source)
           key = @dictionary.keys.detect{|k| k.include?(source) }
           if key
             event[@destination] = @dictionary[key]
